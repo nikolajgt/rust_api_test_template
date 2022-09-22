@@ -1,6 +1,6 @@
 #[macro_use]
 use actix_web::{web::Data, App, HttpServer};
-use api::user_api::{create_user, get_user, update_user, delete_user};
+use api::user_api::{create_user, get_user, update_user, delete_user, get_all_users};
 use repository::mongodb_repo::MongoRepo;
 
 mod api;
@@ -21,6 +21,7 @@ async fn main() -> std::io::Result<()> {
             .service(get_user)
             .service(update_user)
             .service(delete_user)
+            .service(get_all_users)
     })
     .bind("0.0.0.0:9090")?
     .run()
