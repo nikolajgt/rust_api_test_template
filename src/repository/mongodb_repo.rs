@@ -5,7 +5,7 @@ use std::env;
 
 use mongodb::{
     bson::{extjson::de::Error, oid::ObjectId, doc}, //modify here
-    results::{ InsertOneResult},
+    results::{ InsertOneResult, UpdateResult, DeleteResult},
     Client, Collection,
 };
 use crate::models::user_model::User;
@@ -66,4 +66,43 @@ impl MongoRepo {
         
         Ok(user_detail.unwrap())
     }
+
+
+    pub async fn update_user(&self, id: &String, update_user: User) -> Result<UpdateResult, Error> {
+        let obj_id = ObjectId::parse_str(id).unwrap();
+        let filter = doc! {"_id": obj_id };
+        let new_doc = doc! {
+            "$set":
+                {
+                    "id": update_user.id,
+                    "name": update_user.name,
+                    "location": update_user.location,
+                    "title": update_user.title
+                },
+        };
+        
+        let updated_doc = self
+                    .col
+                    .update_one(filter, new_doc, None)
+                    .await
+                    .ok()
+                    .expect("Error updating user");
+
+        Ok(updated_doc)
+    }
+
+    pub async fn delete_user(&self, id: &String) -> Result<DeleteResult, Error> {
+        let obj_id = ObjectId::parse_str(id).unwrap();
+        let filter = doc! {"_id:": obj_id};
+        let user_detail = self 
+                    .col
+                    .delete_one(filter, None)
+                    .await
+                    .ok()
+                    .expect("Error at deleting user");
+
+        Ok(user_detail)
+
+    }
+
 }
